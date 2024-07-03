@@ -1,3 +1,3 @@
-module github.com/mulan17/project-user-service
+module anybuy
 
 go 1.22.2
