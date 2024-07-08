@@ -1,14 +1,14 @@
-package main
+package UserSignup
 
 import (
 	"net/http"
 
-	Signup "github.com/mulan17/project-user-service/internal/users/feature-signup"
+	User "github.com/mulan17/project-user-service/internal/user"
+	UserEmulator "github.com/mulan17/project-user-service/pkg/userEmulator"
 	"github.com/rs/zerolog/log"
 )
 
-func main() {
-
+func UserSignUp() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /user", func(w http.ResponseWriter, r *http.Request) {
@@ -17,16 +17,17 @@ func main() {
 			return
 		}
 
-		userJSON, err := Signup.EmulateUser()
+		userJSON, err := UserEmulator.EmulateUser()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("Failed to emulate user: %v", err)
 			return
 		}
 
-		Signup.CreateUser(w, r, userJSON)
+		User.CreateUser(w, r, userJSON)
 	})
-	mux.HandleFunc("GET /users", Signup.GetUsers)
+	
+	mux.HandleFunc("GET /users", User.GetUsers)
 
 	error := http.ListenAndServe(":8080", mux)
 	if error != nil {
