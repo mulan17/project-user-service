@@ -7,14 +7,29 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var s Storage
+var s InMemStorage
 
 type CreateUserRequestBody struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-func Create(w http.ResponseWriter, r *http.Request) {
+type service interface {
+	SignUp(email, password string)
+	GetUsers() []User
+}
+
+type Handler struct {
+	s service
+}
+
+func NewHandler(s service) Handler {
+	return Handler{
+		s: s,
+	}
+}
+
+func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	var reqBody CreateUserRequestBody
 
 	err := json.NewDecoder(r.Body).Decode(&reqBody)
@@ -24,15 +39,14 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.Create(New(reqBody.Email, reqBody.Password))
+	h.s.SignUp(reqBody.Email, reqBody.Password)
 
 	w.WriteHeader(http.StatusCreated)
 }
 
 // Створила цю функц щоб перевірити чи відправляються юзери на сервер
-func GetUsers(w http.ResponseWriter, r *http.Request) {
-	users := s.users
-
+func (h Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
+	users := h.s.GetUsers()
 	err := json.NewEncoder(w).Encode(users)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
