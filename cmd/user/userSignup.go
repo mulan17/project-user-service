@@ -10,7 +10,7 @@ import (
 func UserSignUp() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /user", User.CreateUser)
+	mux.HandleFunc("POST /user", User.Create)
 
 	mux.HandleFunc("GET /users", User.GetUsers)
 
