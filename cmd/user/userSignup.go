@@ -9,10 +9,12 @@ import (
 
 func UserSignUp() {
 	mux := http.NewServeMux()
+	userStorage := User.NewInMemStorage()
+	userService := User.NewService(userStorage)
+	userHandler := User.NewHandler(userService)
 
-	mux.HandleFunc("POST /user", User.Create)
-
-	mux.HandleFunc("GET /users", User.GetUsers)
+	mux.HandleFunc("POST /user", userHandler.Create)
+	mux.HandleFunc("GET /users", userHandler.GetUsers)
 
 	error := http.ListenAndServe(":8080", mux)
 	if error != nil {
