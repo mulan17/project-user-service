@@ -1,11 +1,43 @@
-RESTful API user-service
+# RESTful API для user-service
 
-Resources:
-/user
-/profile
+## Ресурси
 
-Method:
-Create <res> = POST/user
-Read <res> = GET/user
-Update <res> = none
-Delete <res> none
+- **`/user`**
+- **`/profile`**
+
+## Методи
+
+### **`/user`**
+
+- **Створення (Create)**
+  - **Метод:** `POST`
+  - **Опис:** Додає нового користувача.
+  - **Приклад запиту:**
+    ```http
+    POST /user
+    Content-Type: application/json
+
+    {
+      "email": "user@example.com",
+      "password": "securepassword"
+    }
+    ```
+
+- **Читання (Read)**
+  - **Метод:** `GET`
+  - **Опис:** Отримує інформацію про користувача.
+  - **Приклад запиту:**
+    ```http
+    GET /user
+    ```
+
+
+### **`/profile`**
+
+- **Читання (Read)**
+  - **Метод:** `GET`
+  - **Опис:** Отримує інформацію про профіль користувача.
+  - **Приклад запиту:**
+    ```http
+    GET /profile
+    ```
