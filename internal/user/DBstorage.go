@@ -23,14 +23,14 @@ func NewPostgresStorage(connStr string) (*PostgresStorage, error) {
 func (s *PostgresStorage) Create(u User) {
 	_, err := s.db.Exec("INSERT INTO users (id, email, password, role) VALUES ($1, $2, $3, $4)", u.ID, u.Email, u.Password, u.Role)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to insert user")
+		log.Fatal().Err(err).Msg("Failed to insert user")
 	}
 }
 
 func (s *PostgresStorage) GetUsers() []User {
 	rows, err := s.db.Query("SELECT id, email, password, role FROM users")
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to fetch users")
+		log.Fatal().Err(err).Msg("Failed to fetch users")
 		return nil
 	}
 	defer rows.Close()
@@ -39,11 +39,20 @@ func (s *PostgresStorage) GetUsers() []User {
 	for rows.Next() {
 		var u User
 		if err := rows.Scan(&u.ID, &u.Email, &u.Password, &u.Role); err != nil {
-			log.Error().Err(err).Msg("Failed to scan user")
+			log.Fatal().Err(err).Msg("Failed to scan user")
 			continue
 		}
 		users = append(users, u)
 	}
 
 	return users
+}
+
+func (s *PostgresStorage) Exists(email string) bool {
+	var exists bool
+	err := s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email=$1)", email).Scan(&exists)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to check if user exists")
+	}
+	return exists
 }
