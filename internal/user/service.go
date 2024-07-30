@@ -25,7 +25,7 @@ func (s *Service) SignUp(email, password string) error {
 	// complex logic of gathering user data
 	user := New(email, password)
 
-	//user notifictaions: emails, sms etc
+	//user notifications: emails, sms etc
 	s.s.Create(user)
 
 	//sending internal events to notify other services that user was created

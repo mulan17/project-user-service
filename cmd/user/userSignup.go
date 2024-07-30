@@ -28,3 +28,4 @@ func UserSignUp() {
 		log.Fatal().Err(error).Msg("Failed to listen and serve")
 	}
 }
+
