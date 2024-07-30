@@ -2,6 +2,7 @@ package UserSignup
 
 import (
 	"net/http"
+	"os"
 
 	User "github.com/mulan17/project-user-service/internal/user"
 	"github.com/rs/zerolog/log"
@@ -9,7 +10,13 @@ import (
 
 func UserSignUp() {
 	mux := http.NewServeMux()
-	userStorage := User.NewInMemStorage()
+	connStr := os.Getenv("POSTGRES_CONN_STR")
+
+	// userStorage := User.NewInMemStorage()
+	userStorage, err := User.NewPostgresStorage(connStr)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to connect to the database")
+	}
 	userService := User.NewService(userStorage)
 	userHandler := User.NewHandler(userService)
 
@@ -21,3 +28,4 @@ func UserSignUp() {
 		log.Fatal().Err(error).Msg("Failed to listen and serve")
 	}
 }
+

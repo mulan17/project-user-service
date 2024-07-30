@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var s InMemStorage
+// var s InMemStorage
 
 type CreateUserRequestBody struct {
 	Email    string `json:"email"`
@@ -15,7 +15,7 @@ type CreateUserRequestBody struct {
 }
 
 type service interface {
-	SignUp(email, password string)
+	SignUp(email, password string) error
 	GetUsers() []User
 }
 
@@ -39,7 +39,17 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.s.SignUp(reqBody.Email, reqBody.Password)
+	err = h.s.SignUp(reqBody.Email, reqBody.Password)
+	if err != nil {
+		if err.Error() == "user already exists" {
+			w.WriteHeader(http.StatusConflict)
+			json.NewEncoder(w).Encode(map[string]string{"error": "User already exists"})
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"})
+		}
+		return
+	}
 
 	w.WriteHeader(http.StatusCreated)
 }
