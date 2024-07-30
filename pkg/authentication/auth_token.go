@@ -1,4 +1,4 @@
-package routes
+package authentication
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func login(context *gin.Context) {
+func Login(context *gin.Context) {
 	var user models.User
 
 	err := context.ShouldBindJSON(&user)

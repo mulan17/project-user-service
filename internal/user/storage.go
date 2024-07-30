@@ -1,28 +1,72 @@
-package User
+package profile
 
 import (
 	"sync"
+
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
-type InMemStorage struct {
-	usersM sync.Mutex
-	users  []User
+type Storage struct {
+	m     sync.Mutex
+	users map[string]User
 }
 
-func NewInMemStorage() *InMemStorage {
-	return &InMemStorage{}
+func NewStorage() *Storage {
+	return &Storage{
+		users: make(map[string]User),
+	}
 }
 
-func (s *InMemStorage) Create(u User) {
-	s.usersM.Lock()
-	defer s.usersM.Unlock()
+func (s *Storage) GetAllUsers() []User {
+	users := make([]User, 0, len(s.users))
 
-	s.users = append(s.users, u)
+	for _, user := range s.users {
+		users = append(users, user)
+	}
+
+	return users
 }
 
-func (s *InMemStorage) GetUsers() []User {
-	s.usersM.Lock()
-	defer s.usersM.Unlock()
+func (s *Storage) CreateUser(p User) (string, bool) {
+	s.m.Lock()
 
-	return s.users
+	defer s.m.Unlock()
+
+	id, err := gonanoid.New()
+
+	if err != nil {
+		return "", false
+	}
+
+	p.ID = id
+	s.users[p.ID] = p
+
+	return id, true
+}
+
+func (s *Storage) GetUserById(id string) (User, bool) {
+	p, ok := s.users[id]
+
+	if !ok {
+		return User{}, false
+	}
+
+	return p, true
+}
+
+func (s *Storage) UpdateUser(id string, user User) bool {
+	s.m.Lock()
+
+	defer s.m.Unlock()
+
+	t, ok := s.users[id]
+
+	if !ok {
+		return false
+	}
+
+	user.ID = t.ID
+	s.users[user.ID] = user
+
+	return true
 }

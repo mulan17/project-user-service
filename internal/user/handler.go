@@ -1,68 +1,87 @@
-package User
+package profile
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-
-	"github.com/rs/zerolog/log"
 )
 
-// var s InMemStorage
-
-type CreateUserRequestBody struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+type UserResource struct {
+	S *Storage
 }
 
-type service interface {
-	SignUp(email, password string) error
-	GetUsers() []User
-}
+func (p *UserResource) GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	users := p.S.GetAllUsers()
+	res := map[string][]User{"users": users}
 
-type Handler struct {
-	s service
-}
+	err := json.NewEncoder(w).Encode(res)
 
-func NewHandler(s service) Handler {
-	return Handler{
-		s: s,
+	if err != nil {
+		fmt.Println("Failed to encode: ", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
 	}
 }
 
-func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
-	var reqBody CreateUserRequestBody
+func (p *UserResource) GetUserById(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	user, ok := p.S.GetUserById(id)
+
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := json.NewEncoder(w).Encode(user)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (p *UserResource) CreateUser(w http.ResponseWriter, r *http.Request) {
+	var reqBody User
+
+	userId, ok := p.S.CreateUser(reqBody)
+
+	if !ok {
+		fmt.Print("Error creating user")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	reqBody.ID = userId
 
 	err := json.NewDecoder(r.Body).Decode(&reqBody)
+
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Debug().Err(err).Msg("Failed to decode JSON response")
+		fmt.Println("Failed to decode: ", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
-	err = h.s.SignUp(reqBody.Email, reqBody.Password)
-	if err != nil {
-		if err.Error() == "user already exists" {
-			w.WriteHeader(http.StatusConflict)
-			json.NewEncoder(w).Encode(map[string]string{"error": "User already exists"})
-		} else {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"})
-		}
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
 }
 
-// Створила цю функц щоб перевірити чи відправляються юзери на сервер
-func (h Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
-	users := h.s.GetUsers()
-	err := json.NewEncoder(w).Encode(users)
+func (p *UserResource) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	var reqBody User
+
+	err := json.NewDecoder(r.Body).Decode(&reqBody)
+
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Debug().Err(err).Msg("Failed to encode JSON response")
+		fmt.Println("Failed to encode: ", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	ok := p.S.UpdateUser(id, reqBody)
+
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 }
