@@ -1,8 +1,7 @@
 package main
 
-import "fmt"
-
+import UserSignup "github.com/mulan17/project-user-service/cmd/user"
 
 func main() {
-	fmt.Println("Hi")
+	UserSignup.UserSignUp()
 }
