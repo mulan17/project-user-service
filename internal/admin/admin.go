@@ -3,7 +3,7 @@ package admin
 import (
 	"encoding/json"
 	"net/http"
-	"password-manager/internal/user"
+	"internal/user"
 )
 
 // Функція для перегляду списку покупців
