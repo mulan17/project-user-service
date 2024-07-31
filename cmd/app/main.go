@@ -30,12 +30,10 @@ func main() {
 	mux.HandleFunc("GET /users/{id}", userHandler.GetUserById)
 	mux.HandleFunc("PUT /users/{id}", userHandler.UpdateUser)
 
+	mux.HandleFunc("PUT /admin/block/{id}", userHandler.BlockUser)
+
 	// mux.HandleFunc("POST /login", authentication.Login)
 	
-	//mux.HandleFunc("GET /users", users.GetAllUsers) get users
-	//mux.HandleFunc("POST /users", users.CreateUser)
-	
-
 	// // Маршрут для перегляду списку покупців
 	// http.HandleFunc("/admin/customers", admin.ViewCustomers)
 	// // Маршрут для блокування покупців
@@ -52,13 +50,6 @@ func main() {
 
 }
 
-// // Функція для блокування користувача за ім'ям користувача
-// func BlockCustomer(username string) {
-// 	if user, exists := users[username]; exists {
-// 		user.Status = "blocked"
-// 		users[username] = user
-// 	}
-// }
 
 // // ПРИКЛАД Захищеного маршруту
 // mux.HandleFunc("/protected-route", func(w http.ResponseWriter, r *http.Request) {

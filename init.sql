@@ -4,5 +4,6 @@ CREATE TABLE users (
     password VARCHAR NOT NULL,
     role VARCHAR NOT NULL,
     name VARCHAR,
-    lastname VARCHAR
+    lastname VARCHAR,
+    blocked VARCHAR
 );

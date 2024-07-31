@@ -13,6 +13,7 @@ type User struct {
 	Role     string `json:"role"`
 	Name     string `json:"name"`
 	Lastname string `json:"lastname"`
+	Blocked bool `json:"blocked"`
 }
 
 func New(email, password string) User {
@@ -21,8 +22,9 @@ func New(email, password string) User {
 		Role:     "buyer",
 		Email:    email,
 		Password: password,
-		Name: "Nastya",
-		Lastname: "Mulyukova",
+		Name: "New User",
+		Lastname: "New User Lastname",
+		Blocked: false,
 	}
 
 }
