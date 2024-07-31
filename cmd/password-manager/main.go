@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"github.com/hixi4/password-manager/internal/admin"
-	"github.com/hixi4/password-manager/internal/user"
+	"github.com/mulan17/project-user-service/tree/feature/admin-service/internal/admin"
+	"github.com/ulan17/project-user-service/tree/feature/admin-service/hixi4/internal/user"
 )
 
 func main() {
