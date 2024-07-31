@@ -1,4 +1,4 @@
-package User
+package user
 
 import (
 	"database/sql"
@@ -58,10 +58,13 @@ func (s *PostgresStorage) Exists(email string) bool {
 }
 
 func (s *PostgresStorage) GetUserById(id string) (User, bool) {
+	
 	var user User
-	err := s.db.QueryRow("SELECT id, email, password, role FROM users WHERE id=$1", id).Scan(&user.ID, &user.Email, &user.Password, &user.Role, &user.Name, &user.Lastname)
+	// err := s.db.QueryRow("SELECT id, email, password, role, name, lastname FROM users WHERE id=$1", id).Scan(&user.ID, &user.Email, &user.Password, &user.Role, &user.Name, &user.Lastname)
+	err := s.db.QueryRow("SELECT id, email, password, role, name, lastname FROM users WHERE id=$1", id).Scan(&user.ID, &user.Email, &user.Password, &user.Role, &user.Name, &user.Lastname)
+
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to fetch user ID")
+		log.Fatal().Err(err).Msg("ДЕВОЧКИ ПРИВІТ")
 		return User{}, false
 	}
 	return user, true // TODO do we need pinter here

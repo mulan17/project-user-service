@@ -1,4 +1,4 @@
-package User
+package user
 
 import (
 	"encoding/json"
@@ -19,7 +19,7 @@ type service interface {
 	SignUp(email, password string) error
 	GetUsers() []User
 	GetUserById(id string) (User, bool)
-	UpdateUser(reqBody User, id string) error
+	UpdateUser(reqBody User, id string) bool
 }
 
 type Handler struct {
@@ -101,8 +101,8 @@ func (h Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.s.UpdateUser(reqBody, id)
-		if err != nil {
+	ok := h.s.UpdateUser(reqBody, id)
+		if !ok {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to fetch user"})
 		}

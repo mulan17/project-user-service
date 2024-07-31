@@ -1,4 +1,4 @@
-package User
+package user
 
 import (
 	"math/rand"
@@ -21,6 +21,8 @@ func New(email, password string) User {
 		Role:     "buyer",
 		Email:    email,
 		Password: password,
+		Name: "Nastya",
+		Lastname: "Mulyukova",
 	}
 
 }
