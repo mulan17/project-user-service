@@ -67,3 +67,9 @@ func BlockCustomer(username string) {
 		users[username] = user
 	}
 }
+
+// ПРИКЛАД Захищеного маршруту
+// mux.HandleFunc("/protected-route", func(w http.ResponseWriter, r *http.Request) {
+// 	// Використовуємо middleware Authenticate для перевірки автентифікації
+// 	authentication_check.Authenticate(http.HandlerFunc(yourProtectedHandler)).ServeHTTP(w, r)
+// })

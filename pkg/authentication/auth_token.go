@@ -1,34 +1,37 @@
 package authentication
 
 import (
+	"encoding/json"
 	"net/http"
-	"sign/utils"
 
-	"github.com/gin-gonic/gin"
+	"github.com/mulan17/project-user-service/internal/user"
+	"github.com/mulan17/project-user-service/pkg/authentication_check"
+	"github.com/mulan17/project-user-service/pkg/token"
 )
 
-func Login(context *gin.Context) {
-	var user models.User
+func Login(w http.ResponseWriter, r *http.Request) {
+    var usr user.User
 
-	err := context.ShouldBindJSON(&user)
+    err := json.NewDecoder(r.Body).Decode(&usr)
+    if err != nil {
+        http.Error(w, "Could not parse request data", http.StatusBadRequest)
+        return
+    }
 
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Could not parse request data"})
-		return
-	}
+    err = authentication_check.ValidateCredentials(&usr)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusUnauthorized)
+        return
+    }
 
-	err = user.ValidateCredentials()
+    token, err := token.GenerateToken(usr.Email, usr.Role, usr.ID)
+    if err != nil {
+        http.Error(w, "Problem with generating a token", http.StatusInternalServerError)
+        return
+    }
 
-	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
-		return
-	}
-
-	token, err := utils.GenerateToken(user.Email, user.ID)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Problem with generating a token"})
-	}
-
-	context.JSON(http.StatusOK, gin.H{"message": "Login succesful", "token": token})
-	
+    json.NewEncoder(w).Encode(map[string]string{
+        "message": "Login successful",
+        "token": token,
+    })
 }

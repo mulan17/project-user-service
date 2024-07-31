@@ -1,11 +1,14 @@
-package authentication
+package authentication_check
 
 import (
 	"errors"
-	"sign/utils"
+
+	"github.com/mulan17/project-user-service/internal/user"
+	"github.com/mulan17/project-user-service/pkg/hashing"
 )
 
-func (u *User) ValidateCredentials() error {
+
+func  ValidateCredentials(u *user.User) error {
 	query := "SELECT id, password FROM users WHERE email = ?"
 	row := db.DB.QueryRow(query, u.Email)
 
@@ -16,7 +19,7 @@ func (u *User) ValidateCredentials() error {
 		return errors.New("Credentials invalid")
 	}
 
-	passwordIsValid := utils.CheckPasswordHash(u.Password, retrievedPassword)
+	passwordIsValid := hashing.CheckPasswordHash(u.Password, retrievedPassword)
 
 	if !passwordIsValid {
 		return errors.New("Credentials invalid")
@@ -24,3 +27,4 @@ func (u *User) ValidateCredentials() error {
 
 	return nil
 }
+
