@@ -24,19 +24,18 @@ func main() {
 
 	connStr := os.Getenv("POSTGRES_CONN_STR")
 
-		// userStorage := User.NewInMemStorage()
+	// userStorage := User.NewInMemStorage()
 	userStorage, err := User.NewPostgresStorage(connStr)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to connect to the database")
 	}
 	userService := User.NewService(userStorage)
 	userHandler := User.NewHandler(userService)
-	
+
 	mux.HandleFunc("POST /user", userHandler.Create)
 	mux.HandleFunc("GET /users", userHandler.GetUsers)
 
-
-	mux.HandleFunc("POST /login", authentication.Login) 
+	mux.HandleFunc("POST /login", authentication.Login)
 
 	//mux.HandleFunc("GET /users", users.GetAllUsers) get users
 	mux.HandleFunc("GET /users/{id}", users.GetUserById)
@@ -51,14 +50,13 @@ func main() {
 	http.HandleFunc("/user/profile", user.ViewProfile)
 	// Маршрут для редагування профілю користувача
 	http.HandleFunc("/user/edit", user.EditProfile)
-	
+
 	err = http.ListenAndServe(":8080", mux)
-    if err != nil {
-        log.Fatal().Err(err).Msg("Failed to listen and serve")
-    }
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to listen and serve")
+	}
 
 }
-
 
 // Функція для блокування користувача за ім'ям користувача
 func BlockCustomer(username string) {
