@@ -5,8 +5,9 @@ import (
 	"os"
 
 	User "github.com/mulan17/project-user-service/internal/user"
-	// "github.com/mulan17/project-user-service/pkg/authentication"
 	"github.com/rs/zerolog/log"
+	// "github.com/mulan17/project-user-service/pkg/authentication"
+
 
 )
 
@@ -16,23 +17,24 @@ func main() {
 
 	connStr := os.Getenv("POSTGRES_CONN_STR")
 
-	// userStorage := User.NewInMemStorage()
 	userStorage, err := User.NewPostgresStorage(connStr)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to connect to the database")
 	}
+
 	userService := User.NewService(userStorage)
 	userHandler := User.NewHandler(userService)
 
-	mux.HandleFunc("POST /user", userHandler.Create)
+	mux.HandleFunc("POST /users", userHandler.Create)
 	mux.HandleFunc("GET /users", userHandler.GetUsers)
+	mux.HandleFunc("GET /users/{id}", userHandler.GetUserById)
+	mux.HandleFunc("PUT /users/{id}", userHandler.UpdateUser)
 
 	// mux.HandleFunc("POST /login", authentication.Login)
-
+	
 	//mux.HandleFunc("GET /users", users.GetAllUsers) get users
-	mux.HandleFunc("GET /users/{id}", userHandler.GetUserById)
 	//mux.HandleFunc("POST /users", users.CreateUser)
-	mux.HandleFunc("PUT /users/{id}", userHandler.UpdateUser)
+	
 
 	// // Маршрут для перегляду списку покупців
 	// http.HandleFunc("/admin/customers", admin.ViewCustomers)

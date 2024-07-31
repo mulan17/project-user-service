@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog/log"
@@ -21,14 +22,14 @@ func NewPostgresStorage(connStr string) (*PostgresStorage, error) {
 }
 
 func (s *PostgresStorage) Create(u User) {
-	_, err := s.db.Exec("INSERT INTO users (id, email, password, role) VALUES ($1, $2, $3, $4)", u.ID, u.Email, u.Password, u.Role)
+	_, err := s.db.Exec("INSERT INTO users (id, email, password, role, name, lastname) VALUES ($1, $2, $3, $4, $5, $6)", u.ID, u.Email, u.Password, u.Role, u.Name, u.Lastname)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to insert user")
 	}
 }
 
 func (s *PostgresStorage) GetUsers() []User {
-	rows, err := s.db.Query("SELECT id, email, password, role FROM users")
+	rows, err := s.db.Query("SELECT id, email, password, role, name, lastname FROM users")
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to fetch users")
 		return nil
@@ -38,7 +39,7 @@ func (s *PostgresStorage) GetUsers() []User {
 	var users []User
 	for rows.Next() {
 		var u User
-		if err := rows.Scan(&u.ID, &u.Email, &u.Password, &u.Role); err != nil {
+		if err := rows.Scan(&u.ID, &u.Email, &u.Password, &u.Role, &u.Name, &u.Lastname); err != nil {
 			log.Fatal().Err(err).Msg("Failed to scan user")
 			continue
 		}
@@ -58,10 +59,9 @@ func (s *PostgresStorage) Exists(email string) bool {
 }
 
 func (s *PostgresStorage) GetUserById(id string) (User, bool) {
-	
 	var user User
 	// err := s.db.QueryRow("SELECT id, email, password, role, name, lastname FROM users WHERE id=$1", id).Scan(&user.ID, &user.Email, &user.Password, &user.Role, &user.Name, &user.Lastname)
-	err := s.db.QueryRow("SELECT id, email, password, role, name, lastname FROM users WHERE id=$1", id).Scan(&user.ID, &user.Email, &user.Password, &user.Role, &user.Name, &user.Lastname)
+	err := s.db.QueryRow("SELECT * FROM users WHERE id=$1", id).Scan(&user)
 
 	if err != nil {
 		log.Fatal().Err(err).Msg("ДЕВОЧКИ ПРИВІТ")
@@ -71,7 +71,8 @@ func (s *PostgresStorage) GetUserById(id string) (User, bool) {
 }
 
 func (s *PostgresStorage) UpdateUser(user User, id string) bool {
-	_, err := s.db.Exec("UPDATE users SET email=$1, password=$2, role=$3, name=$4, lastname=$5 WHERE id=$6", user.Email, user.Password, user.Role, user.Name, user.Lastname, user.ID)
+	fmt.Print(user)
+	_, err := s.db.Exec("UPDATE users SET email=$1, password=$2, role=$3, name=$4, lastname=$5 WHERE id=$6", user.Email, user.Password, user.Role, user.Name, user.Lastname, id)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to update user")
 		return false
