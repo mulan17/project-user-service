@@ -67,7 +67,7 @@ func (s *PostgresStorage) GetUserById(id string) (User, bool) {
 	return user, true // TODO do we need pinter here
 }
 
-func (s *PostgresStorage) UpdateUser(id string, user User) bool {
+func (s *PostgresStorage) UpdateUser(user User, id string) bool {
 	_, err := s.db.Exec("UPDATE users SET email=$1, password=$2, role=$3, name=$4, lastname=$5 WHERE id=$6", user.Email, user.Password, user.Role, user.Name, user.Lastname, user.ID)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to update user")

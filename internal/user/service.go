@@ -6,7 +6,7 @@ type storage interface {
 	Create(u User)
 	GetUsers() []User
 	Exists(email string) bool
-	UpdateUser(reqBody User, id string) error
+	UpdateUser(reqBody User, id string) bool
 	GetUserById(id string) (User, bool)
 }
 
@@ -40,13 +40,12 @@ func (s *Service) GetUsers() []User {
 }
 
 func (s *Service) GetUserById(id string) (User, bool) {
-	return s.s.GetUserById(id)
-	// user, ok := s.s.GetUserById(id)
-	// if ok {
-
-	// }
+	user, ok := s.s.GetUserById(id)
+	return user, ok
 }
 
-func (s *Service) UpdateUser(reqBody User, id string) error {
-	
+func (s *Service) UpdateUser(reqBody User, id string) bool {
+	ok := s.s.UpdateUser(reqBody, id)
+ 	return ok
 }
+

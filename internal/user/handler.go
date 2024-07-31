@@ -18,6 +18,8 @@ type CreateUserRequestBody struct {
 type service interface {
 	SignUp(email, password string) error
 	GetUsers() []User
+	GetUserById(id string) (User, bool)
+	UpdateUser(reqBody User, id string) error
 }
 
 type Handler struct {
