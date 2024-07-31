@@ -48,7 +48,7 @@ Will be plus
     
 ##TODO:
 - Buyer не може отримувати і редагувати role and blocked
-- 
+- Error покращіти описи та обмазати заміть bool
 
 ## API
 
