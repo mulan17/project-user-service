@@ -1,6 +1,10 @@
 package user
 
-import "fmt"
+import (
+	"fmt"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 type storage interface {
 	Create(u User)
@@ -8,7 +12,8 @@ type storage interface {
 	Exists(email string) bool
 	UpdateUser(reqBody User, id string) bool
 	GetUserById(id string) (User, bool)
-	BlockUser (id string) bool
+	BlockUser(id string) bool
+	LimitUser(id string) bool
 }
 
 type Service struct {
@@ -25,8 +30,12 @@ func (s *Service) SignUp(email, password string) error {
 	if s.s.Exists(email) {
 		return fmt.Errorf("user already exists")
 	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
 	// complex logic of gathering user data
-	user := New(email, password)
+	user := New(email, string(hash))
 
 	//user notifications: emails, sms etc
 	s.s.Create(user)
@@ -36,8 +45,22 @@ func (s *Service) SignUp(email, password string) error {
 	return nil
 }
 
-func (s *Service) GetUsers() []User {
-	return s.s.GetUsers()
+func (s *Service) GetUsers() ([]UserResponse, error) {
+	users := s.s.GetUsers()
+	var response []UserResponse
+
+	for _, u := range users {
+		response = append(response, UserResponse{
+			ID:       u.ID,
+			Email:    u.Email,
+			Role:     u.Role,
+			Name:     u.Name,
+			Lastname: u.Lastname,
+			Status:   u.Status,
+		})
+	}
+
+	return response, nil
 }
 
 func (s *Service) GetUserById(id string) (User, bool) {
@@ -47,7 +70,7 @@ func (s *Service) GetUserById(id string) (User, bool) {
 
 func (s *Service) UpdateUser(reqBody User, id string) bool {
 	ok := s.s.UpdateUser(reqBody, id)
- 	return ok
+	return ok
 }
 
 func (s *Service) BlockUser(id string) bool {
@@ -55,3 +78,7 @@ func (s *Service) BlockUser(id string) bool {
 	return ok
 }
 
+func (s *Service) LimitUser(id string) bool {
+	ok := s.s.LimitUser(id)
+	return ok
+}

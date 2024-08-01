@@ -5,5 +5,5 @@ CREATE TABLE users (
     role VARCHAR NOT NULL,
     name VARCHAR,
     lastname VARCHAR,
-    blocked VARCHAR
+    status VARCHAR NOT NULL DEFAULT 'active'
 );

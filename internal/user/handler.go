@@ -17,10 +17,11 @@ type CreateUserRequestBody struct {
 
 type service interface {
 	SignUp(email, password string) error
-	GetUsers() []User
+	GetUsers() ([]UserResponse, error)
 	GetUserById(id string) (User, bool)
 	UpdateUser(reqBody User, id string) bool
 	BlockUser(id string) bool
+	LimitUser(id string) bool
 }
 
 type Handler struct {
@@ -58,10 +59,15 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-// Створила цю функц щоб перевірити чи відправляються юзери на сервер
 func (h Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
-	users := h.s.GetUsers()
-	err := json.NewEncoder(w).Encode(users)
+	response, err := h.s.GetUsers()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Debug().Err(err).Msg("Failed to get users")
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Debug().Err(err).Msg("Failed to encode JSON response")
@@ -103,10 +109,10 @@ func (h Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ok := h.s.UpdateUser(reqBody, id)
-		if !ok {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to fetch user"})
-		}
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to fetch user"})
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -116,17 +122,24 @@ func (h Handler) BlockUser(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
 	ok := h.s.BlockUser(id)
-		if !ok {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to block user"})
-		}
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to block user"})
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
+}
 
+func (h Handler) LimitUser(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
 
+	ok := h.s.LimitUser(id)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to limit user"})
+	}
 
+	w.Header().Set("Content-Type", "application/json")
 
-
-	
 }
