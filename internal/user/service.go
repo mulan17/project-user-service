@@ -8,7 +8,8 @@ type storage interface {
 	Exists(email string) bool
 	UpdateUser(reqBody User, id string) bool
 	GetUserById(id string) (User, bool)
-	BlockUser (id string) bool
+	BlockUser(id string) bool
+	LimitUser(id string) bool
 }
 
 type Service struct {
@@ -47,7 +48,7 @@ func (s *Service) GetUserById(id string) (User, bool) {
 
 func (s *Service) UpdateUser(reqBody User, id string) bool {
 	ok := s.s.UpdateUser(reqBody, id)
- 	return ok
+	return ok
 }
 
 func (s *Service) BlockUser(id string) bool {
@@ -55,3 +56,7 @@ func (s *Service) BlockUser(id string) bool {
 	return ok
 }
 
+func (s *Service) LimitUser(id string) bool {
+	ok := s.s.LimitUser(id)
+	return ok
+}

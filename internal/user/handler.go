@@ -21,6 +21,7 @@ type service interface {
 	GetUserById(id string) (User, bool)
 	UpdateUser(reqBody User, id string) bool
 	BlockUser(id string) bool
+	LimitUser(id string) bool
 }
 
 type Handler struct {
@@ -103,10 +104,10 @@ func (h Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ok := h.s.UpdateUser(reqBody, id)
-		if !ok {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to fetch user"})
-		}
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to fetch user"})
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -116,17 +117,24 @@ func (h Handler) BlockUser(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
 	ok := h.s.BlockUser(id)
-		if !ok {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to block user"})
-		}
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to block user"})
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
+}
 
+func (h Handler) LimitUser(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
 
+	ok := h.s.LimitUser(id)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to limit user"})
+	}
 
+	w.Header().Set("Content-Type", "application/json")
 
-
-	
 }

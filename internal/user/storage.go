@@ -81,9 +81,21 @@ func (s *PostgresStorage) UpdateUser(user User, id string) bool {
 
 func (s *PostgresStorage) BlockUser(id string) bool {
 
-	block := true
+	status := "blocked"
 
-	_, err := s.DB.Exec("UPDATE users SET status=$1 WHERE id=$2", block, id)
+	_, err := s.DB.Exec("UPDATE users SET status=$1 WHERE id=$2", status, id)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to block user")
+		return false
+	}
+	return true
+}
+
+func (s *PostgresStorage) LimitUser(id string) bool {
+
+	status := "limited"
+
+	_, err := s.DB.Exec("UPDATE users SET status=$1 WHERE id=$2", status, id)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to block user")
 		return false
