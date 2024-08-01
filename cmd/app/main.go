@@ -5,11 +5,14 @@ import (
 	"os"
 
 	User "github.com/mulan17/project-user-service/internal/user"
+	"github.com/mulan17/project-user-service/pkg/authentication"
+	"github.com/mulan17/project-user-service/pkg/authentication_check"
 	"github.com/rs/zerolog/log"
-	// "github.com/mulan17/project-user-service/pkg/authentication"
-
-
 )
+
+func adminOnly(next http.Handler) http.Handler {
+	return authentication_check.RoleMiddleware("admin", next)
+}
 
 func main() {
 
@@ -25,14 +28,20 @@ func main() {
 	userService := User.NewService(userStorage)
 	userHandler := User.NewHandler(userService)
 
+	authHandler := &authentication.AuthHandler{
+		UserStorage: userStorage,
+	}
+
+	mux.HandleFunc("/login", authHandler.Login) // Маршрут для логіну
+
 	mux.HandleFunc("POST /users", userHandler.Create)
 	mux.HandleFunc("GET /users", userHandler.GetUsers)
 	mux.HandleFunc("GET /users/{id}", userHandler.GetUserById)
 	mux.HandleFunc("PUT /users/{id}", userHandler.UpdateUser)
 
-	mux.HandleFunc("PUT /admin/block/{id}", userHandler.BlockUser)
-
-	// mux.HandleFunc("POST /login", authentication.Login)
+	mux.Handle("/admin/block/{id}", authentication_check.Authenticate(
+		authentication_check.RoleMiddleware("admin", http.HandlerFunc(userHandler.BlockUser)),
+	))
 	
 	// // Маршрут для перегляду списку покупців
 	// http.HandleFunc("/admin/customers", admin.ViewCustomers)
