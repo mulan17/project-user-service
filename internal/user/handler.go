@@ -17,7 +17,7 @@ type CreateUserRequestBody struct {
 
 type service interface {
 	SignUp(email, password string) error
-	GetUsers() []User
+	GetUsers() ([]UserResponse, error)
 	GetUserById(id string) (User, bool)
 	UpdateUser(reqBody User, id string) bool
 	BlockUser(id string) bool
@@ -59,10 +59,15 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-// Створила цю функц щоб перевірити чи відправляються юзери на сервер
 func (h Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
-	users := h.s.GetUsers()
-	err := json.NewEncoder(w).Encode(users)
+	response, err := h.s.GetUsers()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Debug().Err(err).Msg("Failed to get users")
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Debug().Err(err).Msg("Failed to encode JSON response")

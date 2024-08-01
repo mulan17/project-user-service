@@ -37,8 +37,22 @@ func (s *Service) SignUp(email, password string) error {
 	return nil
 }
 
-func (s *Service) GetUsers() []User {
-	return s.s.GetUsers()
+func (s *Service) GetUsers() ([]UserResponse, error) {
+	users := s.s.GetUsers()
+	var response []UserResponse
+
+	for _, u := range users {
+		response = append(response, UserResponse{
+			ID:       u.ID,
+			Email:    u.Email,
+			Role:     u.Role,
+			Name:     u.Name,
+			Lastname: u.Lastname,
+			Status:   u.Status,
+		})
+	}
+
+	return response, nil
 }
 
 func (s *Service) GetUserById(id string) (User, bool) {
