@@ -1,6 +1,10 @@
 package user
 
-import "fmt"
+import (
+	"fmt"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 type storage interface {
 	Create(u User)
@@ -26,8 +30,12 @@ func (s *Service) SignUp(email, password string) error {
 	if s.s.Exists(email) {
 		return fmt.Errorf("user already exists")
 	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
 	// complex logic of gathering user data
-	user := New(email, password)
+	user := New(email, string(hash))
 
 	//user notifications: emails, sms etc
 	s.s.Create(user)
