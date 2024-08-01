@@ -21,7 +21,7 @@ func NewPostgresStorage(connStr string) (*PostgresStorage, error) {
 }
 
 func (s *PostgresStorage) Create(u User) {
-	_, err := s.DB.Exec("INSERT INTO users (id, email, password, role, name, lastname, status) VALUES ($1, $2, $3, $4, $5, $6, $7)", u.ID, u.Email, u.Password, u.Role, u.Name, u.Lastname, u.Status)
+	_, err := s.DB.Exec("INSERT INTO users (email, password, role, name, lastname, status) VALUES ($1, $2, $3, $4, $5, $6)", u.Email, u.Password, u.Role, u.Name, u.Lastname, u.Status)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to insert user")
 	}
