@@ -42,7 +42,11 @@ func main() {
 	mux.Handle("/admin/block/{id}", authentication_check.Authenticate(
 		authentication_check.RoleMiddleware("admin", http.HandlerFunc(userHandler.BlockUser)),
 	))
-	
+
+	mux.Handle("/admin/limit/{id}", authentication_check.Authenticate(
+		authentication_check.RoleMiddleware("admin", http.HandlerFunc(userHandler.LimitUser)),
+	))
+
 	// // Маршрут для перегляду списку покупців
 	// http.HandleFunc("/admin/customers", admin.ViewCustomers)
 	// // Маршрут для блокування покупців
@@ -58,7 +62,6 @@ func main() {
 	}
 
 }
-
 
 // // ПРИКЛАД Захищеного маршруту
 // mux.HandleFunc("/protected-route", func(w http.ResponseWriter, r *http.Request) {
