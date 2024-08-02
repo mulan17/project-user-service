@@ -10,9 +10,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func adminOnly(next http.Handler) http.Handler {
-	return authentication_check.RoleMiddleware("admin", next)
-}
+// func adminOnly(next http.Handler) http.Handler {
+// 	return authentication_check.RoleMiddleware("admin", next)
+// }
 
 func main() {
 
@@ -34,18 +34,29 @@ func main() {
 
 	mux.HandleFunc("/login", authHandler.Login) // Маршрут для логіну
 
-	mux.HandleFunc("POST /users", userHandler.Create)
+	// mux.HandleFunc("POST /users", userHandler.Create)
 	mux.HandleFunc("GET /users", userHandler.GetUsers)
-	mux.HandleFunc("GET /users/{id}", userHandler.GetUserById)
+	// mux.HandleFunc("GET /users/{id}", userHandler.GetUserById)
 	mux.HandleFunc("PUT /users/{id}", userHandler.UpdateUser)
 
-	mux.Handle("/admin/block/{id}", authentication_check.Authenticate(
-		authentication_check.RoleMiddleware("admin", http.HandlerFunc(userHandler.BlockUser)),
-	))
+	authenticatedRouter := http.NewServeMux()
+    authenticatedRouter.HandleFunc("POST /users", userHandler.Create)
+    authenticatedRouter.HandleFunc("GET /users/{id}", userHandler.GetUserById)
 
-	mux.Handle("/admin/limit/{id}", authentication_check.Authenticate(
-		authentication_check.RoleMiddleware("admin", http.HandlerFunc(userHandler.LimitUser)),
-	))
+	authenticatedRouter.HandleFunc("/admin/block/{id}", userHandler.BlockUser)
+	authenticatedRouter.HandleFunc("/admin/limit/{id}", userHandler.BlockUser)
+
+
+	mux.Handle("/admin/block/{id}", authentication_check.Authenticate(authenticatedRouter))
+	mux.Handle("/admin/limit/{id}", authentication_check.Authenticate(authenticatedRouter))
+
+	// mux.Handle("/admin/block/{id}", authentication_check.Authenticate(
+	// 	authentication_check.RoleMiddleware("admin", http.HandlerFunc(userHandler.BlockUser)),
+	// ))
+
+	// mux.Handle("/admin/limit/{id}", authentication_check.Authenticate(
+	// 	authentication_check.RoleMiddleware("admin", http.HandlerFunc(userHandler.LimitUser)),
+	// ))
 
 	// // Маршрут для перегляду списку покупців
 	// http.HandleFunc("/admin/customers", admin.ViewCustomers)

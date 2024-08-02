@@ -16,7 +16,7 @@ func  ValidateCredentials(u *user.User, s *user.PostgresStorage) error {
 	err := row.Scan(&u.ID, &retrievedPassword)
 
 	if err != nil {
-		return errors.New(u.ID)
+		return errors.New("Credentials invalid")
 	}
 
 	passwordIsValid := hashing.CheckPasswordHash(u.Password, retrievedPassword)
