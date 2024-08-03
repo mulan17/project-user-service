@@ -34,38 +34,18 @@ func main() {
 
 	mux.HandleFunc("/login", authHandler.Login) // Маршрут для логіну
 
-	// mux.HandleFunc("POST /users", userHandler.Create)
 	mux.HandleFunc("GET /users", userHandler.GetUsers)
-	// mux.HandleFunc("GET /users/{id}", userHandler.GetUserById)
 	mux.HandleFunc("PUT /users/{id}", userHandler.UpdateUser)
 
 	authenticatedRouter := http.NewServeMux()
-    authenticatedRouter.HandleFunc("POST /users", userHandler.Create)
-    authenticatedRouter.HandleFunc("GET /users/{id}", userHandler.GetUserById)
+	mux.HandleFunc("POST /users", userHandler.Create)
+	authenticatedRouter.HandleFunc("GET /users/{id}", userHandler.GetUserById)
 
 	authenticatedRouter.HandleFunc("/admin/block/{id}", userHandler.BlockUser)
 	authenticatedRouter.HandleFunc("/admin/limit/{id}", userHandler.BlockUser)
 
-
 	mux.Handle("/admin/block/{id}", authentication_check.Authenticate(authenticatedRouter))
 	mux.Handle("/admin/limit/{id}", authentication_check.Authenticate(authenticatedRouter))
-
-	// mux.Handle("/admin/block/{id}", authentication_check.Authenticate(
-	// 	authentication_check.RoleMiddleware("admin", http.HandlerFunc(userHandler.BlockUser)),
-	// ))
-
-	// mux.Handle("/admin/limit/{id}", authentication_check.Authenticate(
-	// 	authentication_check.RoleMiddleware("admin", http.HandlerFunc(userHandler.LimitUser)),
-	// ))
-
-	// // Маршрут для перегляду списку покупців
-	// http.HandleFunc("/admin/customers", admin.ViewCustomers)
-	// // Маршрут для блокування покупців
-	// http.HandleFunc("/admin/block", admin.BlockCustomer)
-	// // Маршрут для перегляду профілю користувача
-	// http.HandleFunc("/user/profile", user.ViewProfile)
-	// // Маршрут для редагування профілю користувача
-	// http.HandleFunc("/user/edit", user.EditProfile)
 
 	err = http.ListenAndServe(":8080", mux)
 	if err != nil {
@@ -73,9 +53,3 @@ func main() {
 	}
 
 }
-
-// // ПРИКЛАД Захищеного маршруту
-// mux.HandleFunc("/protected-route", func(w http.ResponseWriter, r *http.Request) {
-// 	// Використовуємо middleware Authenticate для перевірки автентифікації
-// 	authentication_check.Authenticate(http.HandlerFunc(yourProtectedHandler)).ServeHTTP(w, r)
-// })

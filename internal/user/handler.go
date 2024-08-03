@@ -8,8 +8,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// var s InMemStorage
-
 type CreateUserRequestBody struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`

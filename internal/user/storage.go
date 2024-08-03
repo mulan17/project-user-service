@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/lib/pq"
 	"github.com/mulan17/project-user-service/pkg/hashing"
@@ -15,22 +16,24 @@ type PostgresStorage struct {
 func NewPostgresStorage(connStr string) (*PostgresStorage, error) {
 	DB, err := sql.Open("postgres", connStr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("opening database: %v", err)
 	}
 
 	return &PostgresStorage{DB: DB}, nil
 }
 
-func (s *PostgresStorage) Create(u User) {
+func (s *PostgresStorage) Create(u User) error {
 	password, err := hashing.HashPassword(u.Password)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to hash password in inserting")
+		// log.Fatal().Err(err).Msg("Failed to hash password in inserting")
+		return fmt.Errorf("hashing password: %v", err)
 	}
-
 	_, err = s.DB.Exec("INSERT INTO users (email, password, role, name, lastname, status) VALUES ($1, $2, $3, $4, $5, $6)", u.Email, password, u.Role, u.Name, u.Lastname, u.Status)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to insert user")
+		// log.Fatal().Err(err).Msg("Failed to insert user")
+		return fmt.Errorf("inserting user: %v", err)
 	}
+	return nil
 }
 
 func (s *PostgresStorage) GetUsers() []User {
@@ -65,7 +68,7 @@ func (s *PostgresStorage) Exists(email string) bool {
 
 func (s *PostgresStorage) GetUserById(id string) (User, bool) {
 	var user User
-	// err := s.DB.QueryRow("SELECT id, email, password, role, name, lastname, status FROM users id=&1 email=$2, password=$3, role=$4, name=$5, lastname=$6, status=$7 WHERE id=$8", id).Scan(&user.ID, &user.Email, &user.Password, &user.Role, &user.Name, &user.Lastname, &user.Blocked, id)
+	// err := s.DB.QueryRow("SELECT id, email, password, role, name, lastname, status FROM users id=&1 email=$2, password=$3, role=$4, name=$5, lastname=$6, status=$7 WHERE id=$8", id).Scan(&user.ID, &user.Email, &user.Password, &user.Role, &user.Name, &user.Lastname, &user.Status, id)
 	// err := s.DB.QueryRow("SELECT * FROM users WHERE id=$1", id).Scan(&user)
 	err := s.DB.QueryRow("SELECT id, email, password, role, name, lastname, status FROM users WHERE id=$1", id).Scan(&user.ID, &user.Email, &user.Password, &user.Role, &user.Name, &user.Lastname, &user.Status)
 

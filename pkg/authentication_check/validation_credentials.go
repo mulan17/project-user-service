@@ -9,7 +9,7 @@ import (
 
 
 func  ValidateCredentials(u *user.User, s *user.PostgresStorage) error {
-	query := "SELECT id, password FROM users WHERE email = ?"
+	query := "SELECT id, password FROM users WHERE email = $1"
 	row := s.DB.QueryRow(query, u.Email)
 
 	var retrievedPassword string
