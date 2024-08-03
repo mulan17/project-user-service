@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	_ "github.com/lib/pq"
+	"github.com/mulan17/project-user-service/pkg/hashing"
 	"github.com/rs/zerolog/log"
 )
 
@@ -21,7 +22,12 @@ func NewPostgresStorage(connStr string) (*PostgresStorage, error) {
 }
 
 func (s *PostgresStorage) Create(u User) {
-	_, err := s.DB.Exec("INSERT INTO users (email, password, role, name, lastname, status) VALUES ($1, $2, $3, $4, $5, $6)", u.Email, u.Password, u.Role, u.Name, u.Lastname, u.Status)
+	password, err := hashing.HashPassword(u.Password)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to hash password in inserting")
+	}
+
+	_, err = s.DB.Exec("INSERT INTO users (email, password, role, name, lastname, status) VALUES ($1, $2, $3, $4, $5, $6)", u.Email, password, u.Role, u.Name, u.Lastname, u.Status)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to insert user")
 	}
