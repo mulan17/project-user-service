@@ -28,6 +28,11 @@ func Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
+		if role != "admin" {
+			http.Error(w, "Not authorized as admin", http.StatusUnauthorized)
+			return
+		}
+
 		ctx := context.WithValue(r.Context(), "userId", userId)
 		ctx = context.WithValue(ctx, "role", role)
 		ctx = context.WithValue(ctx, "email", email)

@@ -2,7 +2,6 @@ package user
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/rs/zerolog/log"
@@ -16,10 +15,10 @@ type CreateUserRequestBody struct {
 type service interface {
 	SignUp(email, password string) error
 	GetUsers() ([]UserResponse, error)
-	GetUserById(id string) (User, bool)
-	UpdateUser(reqBody User, id string) bool
-	BlockUser(id string) bool
-	LimitUser(id string) bool
+	GetUserById(id string) (User, error)
+	UpdateUser(reqBody User, id string) error
+	BlockUser(id string) error
+	LimitUser(id string) error
 }
 
 type Handler struct {
@@ -32,6 +31,7 @@ func NewHandler(s service) Handler {
 	}
 }
 
+// TODO розібратись по функції та як додати помилки
 func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	var reqBody CreateUserRequestBody
 
@@ -59,6 +59,7 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	response, err := h.s.GetUsers()
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Debug().Err(err).Msg("Failed to get users")
@@ -66,6 +67,7 @@ func (h Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = json.NewEncoder(w).Encode(response)
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Debug().Err(err).Msg("Failed to encode JSON response")
@@ -78,15 +80,18 @@ func (h Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 func (h Handler) GetUserById(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	user, ok := h.s.GetUserById(id)
+	user, err := h.s.GetUserById(id)
 
-	if !ok {
+	if err != nil {
+		log.Debug().Err(err).Msg("Failed to get user by id")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err := json.NewEncoder(w).Encode(user)
+	err = json.NewEncoder(w).Encode(user)
+
 	if err != nil {
+		log.Debug().Err(err).Msg("Failed to encode")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -101,13 +106,15 @@ func (h Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&reqBody)
 
 	if err != nil {
-		fmt.Println("Failed to encode: ", err.Error())
+		log.Debug().Err(err).Msg("Failed to decode")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	ok := h.s.UpdateUser(reqBody, id)
-	if !ok {
+	err = h.s.UpdateUser(reqBody, id)
+
+	if err != nil {
+		log.Debug().Err(err).Msg("Failed to update user")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to fetch user"})
 	}
@@ -119,8 +126,9 @@ func (h Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 func (h Handler) BlockUser(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	ok := h.s.BlockUser(id)
-	if !ok {
+	err := h.s.BlockUser(id)
+	if err != nil {
+		log.Debug().Err(err).Msg("Failed to block user")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to block user"})
 	}
@@ -132,8 +140,10 @@ func (h Handler) BlockUser(w http.ResponseWriter, r *http.Request) {
 func (h Handler) LimitUser(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	ok := h.s.LimitUser(id)
-	if !ok {
+	err := h.s.LimitUser(id)
+	if err != nil {
+		log.Debug().Err(err).Msg("Failed to limit user")
+
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to limit user"})
 	}

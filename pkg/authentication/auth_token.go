@@ -23,14 +23,15 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+
 	// Передаємо userStorage до ValidateCredentials
 	err = authentication_check.ValidateCredentials(&usr, h.UserStorage)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
-
 	token, err := token.GenerateToken(usr.Email, usr.Role, usr.ID)
+
 	if err != nil {
 		http.Error(w, "Problem with generating a token", http.StatusInternalServerError)
 		return
@@ -38,6 +39,6 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Login successful",
-		"token": token,
+		"token":   token,
 	})
 }

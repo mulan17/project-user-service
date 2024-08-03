@@ -2,18 +2,20 @@ package user
 
 import (
 	"fmt"
+	"log"
 
-	"golang.org/x/crypto/bcrypt"
+	"github.com/mulan17/project-user-service/pkg/hashing"
+	// "golang.org/x/crypto/bcrypt"
 )
 
 type storage interface {
-	Create(u User)
-	GetUsers() []User
-	Exists(email string) bool
-	UpdateUser(reqBody User, id string) bool
-	GetUserById(id string) (User, bool)
-	BlockUser(id string) bool
-	LimitUser(id string) bool
+	Create(u User) error
+	GetUsers() ([]User, error)
+	Exists(email string) (bool, error)
+	UpdateUser(reqBody User, id string) error
+	GetUserById(id string) (User, error)
+	BlockUser(id string) error
+	LimitUser(id string) error
 }
 
 type Service struct {
@@ -27,10 +29,21 @@ func NewService(s storage) *Service {
 }
 
 func (s *Service) SignUp(email, password string) error {
-	if s.s.Exists(email) {
+	// if s.s.Exists(email) {
+	// 	return fmt.Errorf("user already exists")
+	// }
+	exists, err := s.s.Exists(email)
+
+	if exists {
 		return fmt.Errorf("user already exists")
 	}
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("checking if users exist: %v", err)
+	}
+	log.Printf("password that we get %v", password)
+
+	hash, err := hashing.HashPassword(password)
+	log.Printf("hash that we get %v", hash)
 	if err != nil {
 		return err
 	}
@@ -46,7 +59,11 @@ func (s *Service) SignUp(email, password string) error {
 }
 
 func (s *Service) GetUsers() ([]UserResponse, error) {
-	users := s.s.GetUsers()
+	users, err := s.s.GetUsers()
+	
+	if err != nil {
+		return nil, fmt.Errorf("getting users: %v", err)
+	}
 	var response []UserResponse
 
 	for _, u := range users {
@@ -63,22 +80,34 @@ func (s *Service) GetUsers() ([]UserResponse, error) {
 	return response, nil
 }
 
-func (s *Service) GetUserById(id string) (User, bool) {
-	user, ok := s.s.GetUserById(id)
-	return user, ok
+func (s *Service) GetUserById(id string) (User, error) {
+	user, err := s.s.GetUserById(id)
+	if err != nil {
+		return User{}, fmt.Errorf("getting user by id: %v", err)
+	}
+	return user, nil
 }
 
-func (s *Service) UpdateUser(reqBody User, id string) bool {
-	ok := s.s.UpdateUser(reqBody, id)
-	return ok
+func (s *Service) UpdateUser(reqBody User, id string) error {
+	err := s.s.UpdateUser(reqBody, id)
+	if err != nil {
+		return fmt.Errorf("updating user: %v", err)
+	}
+	return nil
 }
 
-func (s *Service) BlockUser(id string) bool {
-	ok := s.s.BlockUser(id)
-	return ok
+func (s *Service) BlockUser(id string) error {
+	err := s.s.BlockUser(id)
+	if err != nil {
+		return fmt.Errorf("blocking user: %v", err)
+	}
+	return nil
 }
 
-func (s *Service) LimitUser(id string) bool {
-	ok := s.s.LimitUser(id)
-	return ok
+func (s *Service) LimitUser(id string) error {
+	err := s.s.LimitUser(id)
+	if err != nil {
+		return fmt.Errorf("limiting user: %v", err)
+	}
+	return nil
 }

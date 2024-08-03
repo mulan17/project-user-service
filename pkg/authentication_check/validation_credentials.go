@@ -2,6 +2,7 @@ package authentication_check
 
 import (
 	"errors"
+	"log"
 
 	"github.com/mulan17/project-user-service/internal/user"
 	"github.com/mulan17/project-user-service/pkg/hashing"
@@ -16,13 +17,15 @@ func  ValidateCredentials(u *user.User, s *user.PostgresStorage) error {
 	err := row.Scan(&u.ID, &retrievedPassword)
 
 	if err != nil {
-		return errors.New("Credentials invalid")
+		return errors.New("credentials invalid")
 	}
 
+	log.Printf("id from database %v, id from user input %v", retrievedPassword, u.Password)
+	
 	passwordIsValid := hashing.CheckPasswordHash(u.Password, retrievedPassword)
 
 	if !passwordIsValid {
-		return errors.New("Credentials password invalid")
+		return errors.New("credentials password invalid")
 	}
 
 	return nil
