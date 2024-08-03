@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/mulan17/project-user-service/pkg/hashing"
-	// "golang.org/x/crypto/bcrypt"
 )
 
 type storage interface {
@@ -29,9 +28,6 @@ func NewService(s storage) *Service {
 }
 
 func (s *Service) SignUp(email, password string) error {
-	// if s.s.Exists(email) {
-	// 	return fmt.Errorf("user already exists")
-	// }
 	exists, err := s.s.Exists(email)
 
 	if exists {
@@ -47,20 +43,16 @@ func (s *Service) SignUp(email, password string) error {
 	if err != nil {
 		return err
 	}
-	// complex logic of gathering user data
 	user := New(email, string(hash))
 
-	//user notifications: emails, sms etc
 	s.s.Create(user)
 
-	//sending internal events to notify other services that user was created
-	//etc
 	return nil
 }
 
 func (s *Service) GetUsers() ([]UserResponse, error) {
 	users, err := s.s.GetUsers()
-	
+
 	if err != nil {
 		return nil, fmt.Errorf("getting users: %v", err)
 	}

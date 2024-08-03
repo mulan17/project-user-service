@@ -3,7 +3,6 @@ package user
 type User struct {
 	ID       string `json:"ID"`
 	Email    string `json:"email"`
-	// changed -
 	Password string `json:"password"` 
 	Role     string `json:"role"`
 	Name     string `json:"name"`

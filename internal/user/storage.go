@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"strings"
 	_ "github.com/lib/pq"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 )
@@ -26,7 +26,6 @@ func NewPostgresStorage(connStr string) (*PostgresStorage, error) {
 func (s *PostgresStorage) Create(u User) error {
 	_, err := s.DB.Exec("INSERT INTO users (email, password, role, name, lastname, status) VALUES ($1, $2, $3, $4, $5, $6)", u.Email, u.Password, u.Role, u.Name, u.Lastname, u.Status)
 	if err != nil {
-		// log.Fatal().Err(err).Msg("Failed to insert user")
 		return fmt.Errorf("inserting user: %v", err)
 	}
 	return nil
@@ -35,7 +34,6 @@ func (s *PostgresStorage) Create(u User) error {
 func (s *PostgresStorage) GetUsers() ([]User, error) {
 	rows, err := s.DB.Query("SELECT id, email, password, role, name, lastname, status FROM users")
 	if err != nil {
-		// log.Fatal().Err(err).Msg("Failed to fetch users")
 		return nil, fmt.Errorf("querying users: %v", err)
 	}
 	defer rows.Close()
@@ -57,7 +55,6 @@ func (s *PostgresStorage) Exists(email string) (bool, error) {
 	var exists bool
 	err := s.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email=$1)", email).Scan(&exists)
 	if err != nil {
-		// log.Fatal().Err(err).Msg("Failed to check if user exists")
 		return false, fmt.Errorf("checking if users exist: %v", err)
 	}
 	return exists, nil
@@ -68,10 +65,9 @@ func (s *PostgresStorage) GetUserById(id string) (User, error) {
 	err := s.DB.QueryRow("SELECT id, email, password, role, name, lastname, status FROM users WHERE id=$1", id).Scan(&user.ID, &user.Email, &user.Password, &user.Role, &user.Name, &user.Lastname, &user.Status)
 
 	if err != nil {
-		// log.Fatal().Err(err).Msg("ДЕВОЧКИ ПРИВІТ")
 		return User{}, fmt.Errorf("querying user: %v", err)
 	}
-	return user, nil // TODO do we need pointer here
+	return user, nil
 }
 
 // func (s *PostgresStorage) UpdateUser(user User, id string) error {
@@ -83,61 +79,58 @@ func (s *PostgresStorage) GetUserById(id string) (User, error) {
 // 	return nil
 // }
 
+// TODO спростить функцію та видалити коменти вище
 func (s *PostgresStorage) UpdateUser(user User, id string) error {
-    query := "UPDATE users SET"
-    var updates []string
-    var args []interface{}
-    var argIdx int = 1
+	query := "UPDATE users SET"
+	var updates []string
+	var args []interface{}
+	var argIdx int = 1
 
-    if user.Email != "" {
-        updates = append(updates, fmt.Sprintf(" email=$%d", argIdx))
-        args = append(args, user.Email)
-        argIdx++
-    }
-    if user.Password != "" {
-        updates = append(updates, fmt.Sprintf(" password=$%d", argIdx))
-        args = append(args, user.Password)
-        argIdx++
-    }
-    if user.Role != "" {
-        updates = append(updates, fmt.Sprintf(" role=$%d", argIdx))
-        args = append(args, user.Role)
-        argIdx++
-    }
-    if user.Name != "" {
-        updates = append(updates, fmt.Sprintf(" name=$%d", argIdx))
-        args = append(args, user.Name)
-        argIdx++
-    }
-    if user.Lastname != "" {
-        updates = append(updates, fmt.Sprintf(" lastname=$%d", argIdx))
-        args = append(args, user.Lastname)
-        argIdx++
-    }
-    if user.Status != "" {
-        updates = append(updates, fmt.Sprintf(" status=$%d", argIdx))
-        args = append(args, user.Status)
-        argIdx++
-    }
+	if user.Email != "" {
+		updates = append(updates, fmt.Sprintf(" email=$%d", argIdx))
+		args = append(args, user.Email)
+		argIdx++
+	}
+	if user.Password != "" {
+		updates = append(updates, fmt.Sprintf(" password=$%d", argIdx))
+		args = append(args, user.Password)
+		argIdx++
+	}
+	if user.Role != "" {
+		updates = append(updates, fmt.Sprintf(" role=$%d", argIdx))
+		args = append(args, user.Role)
+		argIdx++
+	}
+	if user.Name != "" {
+		updates = append(updates, fmt.Sprintf(" name=$%d", argIdx))
+		args = append(args, user.Name)
+		argIdx++
+	}
+	if user.Lastname != "" {
+		updates = append(updates, fmt.Sprintf(" lastname=$%d", argIdx))
+		args = append(args, user.Lastname)
+		argIdx++
+	}
+	if user.Status != "" {
+		updates = append(updates, fmt.Sprintf(" status=$%d", argIdx))
+		args = append(args, user.Status)
+		argIdx++
+	}
 
-    // If no updates are provided, return an error
-    if len(updates) == 0 {
-        return fmt.Errorf("no fields to update")
-    }
+	if len(updates) == 0 {
+		return fmt.Errorf("no fields to update")
+	}
 
-    // Join the updates and add the WHERE clause
-    query += strings.Join(updates, ",") + fmt.Sprintf(" WHERE id=$%d", argIdx)
-    args = append(args, id)
+	query += strings.Join(updates, ",") + fmt.Sprintf(" WHERE id=$%d", argIdx)
+	args = append(args, id)
 
-    // Execute the query
-    _, err := s.DB.Exec(query, args...)
-    if err != nil {
-        return fmt.Errorf("updating user: %v", err)
-    }
+	_, err := s.DB.Exec(query, args...)
+	if err != nil {
+		return fmt.Errorf("updating user: %v", err)
+	}
 
-    return nil
+	return nil
 }
-
 
 func (s *PostgresStorage) BlockUser(id string) error {
 
@@ -145,7 +138,6 @@ func (s *PostgresStorage) BlockUser(id string) error {
 
 	_, err := s.DB.Exec("UPDATE users SET status=$1 WHERE id=$2", status, id)
 	if err != nil {
-		// log.Fatal().Err(err).Msg("Failed to block user")
 		return fmt.Errorf("blocking user: %v", err)
 	}
 	return nil
@@ -157,7 +149,6 @@ func (s *PostgresStorage) LimitUser(id string) error {
 
 	_, err := s.DB.Exec("UPDATE users SET status=$1 WHERE id=$2", status, id)
 	if err != nil {
-		// log.Fatal().Err(err).Msg("Failed to block user")
 		return fmt.Errorf("limiting user: %v", err)
 	}
 	return nil
