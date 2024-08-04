@@ -2,8 +2,10 @@ package user
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
+	service_errors "github.com/mulan17/project-user-service/internal/errors"
 	"github.com/rs/zerolog/log"
 )
 
@@ -31,7 +33,7 @@ func NewHandler(s service) Handler {
 	}
 }
 
-// TODO розібратись по функції та як додати помилки
+// TODO розібратись по функції щоб потіп додати помилки, бо ми тут пропусти та необмазували помилками
 func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	var reqBody CreateUserRequestBody
 
@@ -43,8 +45,9 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = h.s.SignUp(reqBody.Email, reqBody.Password)
+	
 	if err != nil {
-		if err.Error() == "user already exists" {
+		if errors.Is(err, service_errors.ErrUserAlreadyExists) {
 			w.WriteHeader(http.StatusConflict)
 			json.NewEncoder(w).Encode(map[string]string{"error": "User already exists"})
 		} else {
