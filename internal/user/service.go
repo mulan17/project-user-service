@@ -1,6 +1,8 @@
 package user
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/mulan17/project-user-service/pkg/hashing"
@@ -72,6 +74,9 @@ func (s *Service) GetUsers() ([]UserResponse, error) {
 func (s *Service) GetUserById(id string) (User, error) {
 	user, err := s.s.GetUserById(id)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return User{}, fmt.Errorf("user wasn't found: %v", err)
+		}
 		return User{}, fmt.Errorf("getting user by id: %v", err)
 	}
 	return user, nil
