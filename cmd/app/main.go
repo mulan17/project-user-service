@@ -5,11 +5,14 @@ import (
 	"os"
 
 	User "github.com/mulan17/project-user-service/internal/user"
+	"github.com/mulan17/project-user-service/pkg/authentication"
+	"github.com/mulan17/project-user-service/pkg/authentication_check"
 	"github.com/rs/zerolog/log"
-	// "github.com/mulan17/project-user-service/pkg/authentication"
-
-
 )
+
+// func adminOnly(next http.Handler) http.Handler {
+// 	return authentication_check.RoleMiddleware("admin", next)
+// }
 
 func main() {
 
@@ -25,23 +28,29 @@ func main() {
 	userService := User.NewService(userStorage)
 	userHandler := User.NewHandler(userService)
 
-	mux.HandleFunc("POST /users", userHandler.Create)
-	mux.HandleFunc("GET /users", userHandler.GetUsers)
-	mux.HandleFunc("GET /users/{id}", userHandler.GetUserById)
-	mux.HandleFunc("PUT /users/{id}", userHandler.UpdateUser)
+	authHandler := &authentication.AuthHandler{
+		UserStorage: userStorage,
+	}
 
-	mux.HandleFunc("PUT /admin/block/{id}", userHandler.BlockUser)
+	mux.HandleFunc("/login", authHandler.Login) // Маршрут для логіну
 
-	// mux.HandleFunc("POST /login", authentication.Login)
+	authenticatedRouter := http.NewServeMux()
+	mux.HandleFunc("GET /users", userHandler.GetUsers) 
+	mux.HandleFunc("PATCH /users/{id}", userHandler.UpdateUser)
 	
-	// // Маршрут для перегляду списку покупців
-	// http.HandleFunc("/admin/customers", admin.ViewCustomers)
-	// // Маршрут для блокування покупців
-	// http.HandleFunc("/admin/block", admin.BlockCustomer)
-	// // Маршрут для перегляду профілю користувача
-	// http.HandleFunc("/user/profile", user.ViewProfile)
-	// // Маршрут для редагування профілю користувача
-	// http.HandleFunc("/user/edit", user.EditProfile)
+	mux.HandleFunc("POST /users", userHandler.Create)
+	authenticatedRouter.HandleFunc("GET /users/{id}", userHandler.GetUserById)
+
+	authenticatedRouter.HandleFunc("/admin/block/{id}", userHandler.BlockUser)
+	authenticatedRouter.HandleFunc("/admin/limit/{id}", userHandler.BlockUser)
+
+
+	// mux.Handle("GET /users", authentication_check.Authenticate(authenticatedRouter))
+	// mux.Handle("PUT /users/{id}", authentication_check.Authenticate(authenticatedRouter))
+	mux.Handle("GET /users/{id}", authentication_check.Authenticate(authenticatedRouter))
+
+	mux.Handle("/admin/block/{id}", authentication_check.Authenticate(authenticatedRouter))
+	mux.Handle("/admin/limit/{id}", authentication_check.Authenticate(authenticatedRouter))
 
 	err = http.ListenAndServe(":8080", mux)
 	if err != nil {
@@ -49,10 +58,3 @@ func main() {
 	}
 
 }
-
-
-// // ПРИКЛАД Захищеного маршруту
-// mux.HandleFunc("/protected-route", func(w http.ResponseWriter, r *http.Request) {
-// 	// Використовуємо middleware Authenticate для перевірки автентифікації
-// 	authentication_check.Authenticate(http.HandlerFunc(yourProtectedHandler)).ServeHTTP(w, r)
-// })
