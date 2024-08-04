@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/mulan17/project-user-service/internal/user"
-	"github.com/mulan17/project-user-service/pkg/authentication_check"
 	"github.com/mulan17/project-user-service/pkg/token"
 )
 
@@ -16,16 +15,14 @@ type AuthHandler struct {
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var usr user.User
-
 	err := json.NewDecoder(r.Body).Decode(&usr)
 	if err != nil {
 		http.Error(w, "Could not parse request data", http.StatusBadRequest)
 		return
 	}
 
+	usr, err = h.UserStorage.Login(usr.Email, usr.Password)
 
-	// Передаємо userStorage до ValidateCredentials
-	err = authentication_check.ValidateCredentials(&usr, h.UserStorage)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return

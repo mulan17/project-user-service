@@ -62,15 +62,4 @@ func VerifyToken(tokenString string) (string, string, string, error) {
 	return email, role, userId, nil
 }
 
-// ПРИКЛАД Як витягати інфу з токену:
-// func SomeProtectedHandler(w http.ResponseWriter, r *http.Request) {
-//     // Отримання інформації з контексту
-//     userId, ok := r.Context().Value("userId").(string)
-//     if !ok {
-//         http.Error(w, "User ID not found in context", http.StatusInternalServerError)
-//         return
-//     }
 
-//     // Виконання логіки з отриманим userId
-//     w.Write([]byte("User ID: " + userId))
-// }

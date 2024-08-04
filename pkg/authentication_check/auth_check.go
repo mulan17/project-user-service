@@ -22,6 +22,7 @@ func Authenticate(next http.Handler) http.Handler {
 		}
 
 		email, role, userId, err := token.VerifyToken(authToken)
+		
 
 		if err != nil {
 			http.Error(w, "Not authorized", http.StatusUnauthorized)

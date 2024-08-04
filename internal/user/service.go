@@ -2,7 +2,6 @@ package user
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/mulan17/project-user-service/pkg/hashing"
 	// "golang.org/x/crypto/bcrypt"
@@ -40,10 +39,8 @@ func (s *Service) SignUp(email, password string) error {
 	if err != nil {
 		return fmt.Errorf("checking if users exist: %v", err)
 	}
-	log.Printf("password that we get %v", password)
 
 	hash, err := hashing.HashPassword(password)
-	log.Printf("hash that we get %v", hash)
 	if err != nil {
 		return err
 	}

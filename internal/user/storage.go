@@ -3,11 +3,13 @@ package user
 import (
 	"database/sql"
 	"fmt"
+	
 
 	"strings"
 	_ "github.com/lib/pq"
 
 	"github.com/rs/zerolog/log"
+	"github.com/mulan17/project-user-service/pkg/authentication_check"
 )
 
 type PostgresStorage struct {
@@ -51,6 +53,20 @@ func (s *PostgresStorage) GetUsers() ([]User, error) {
 	}
 
 	return users, nil
+}
+
+func (s *PostgresStorage) Login(email, password string) (User, error) {
+	var user User
+	err := s.DB.QueryRow("SELECT id, email, password, role, name, lastname, status FROM users WHERE email = $1", email).Scan(&user.ID, &user.Email, &user.Password, &user.Role, &user.Name, &user.Lastname, &user.Status)
+	if err != nil {
+		return User{}, fmt.Errorf("Can't find user %v", err)
+	} 
+	log.Printf("(66)User from DB: %v", user)
+	err = authentication_check.ValidateCredentials(password, user.Password)
+	if err != nil {
+		return User{}, fmt.Errorf("Wrong password %v", err)
+	}
+	return user, nil
 }
 
 func (s *PostgresStorage) Exists(email string) (bool, error) {
