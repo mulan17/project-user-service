@@ -8,7 +8,6 @@ import (
 	"github.com/mulan17/project-user-service/pkg/token"
 )
 
-// Зберігає об'єкт PostgresStorage для доступу до бази даних
 type AuthHandler struct {
 	UserStorage *user.PostgresStorage
 }

@@ -9,9 +9,7 @@ import (
 
 const secretKey = "supersecret"
 
-// GenerateToken creates a new JWT token with user details.
 func GenerateToken(email, role, userId string) (string, error) {
-	// Define token claims
 	claims := jwt.MapClaims{
 		"Email": email,
 		"ID":    userId,
@@ -19,17 +17,13 @@ func GenerateToken(email, role, userId string) (string, error) {
 		"exp":   time.Now().Add(time.Hour * 2).Unix(), // Token expiration time
 	}
 
-	// Create a new token with the claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	// Sign and return the token
 	return token.SignedString([]byte(secretKey))
 }
 
-// VerifyToken parses and validates the JWT token.
 func VerifyToken(tokenString string) (string, string, string, error) {
 	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Validate token signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
@@ -44,13 +38,16 @@ func VerifyToken(tokenString string) (string, string, string, error) {
 		return "", "", tokenString, errors.New("invalid token")
 	}
 
-	// Extract claims from the token
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
 		return "", "", tokenString, errors.New("invalid token claims")
 	}
 
-	// Extract user details from claims
+	exp, ok := claims["exp"].(float64)
+	if !ok || time.Unix(int64(exp), 0).Before(time.Now()) {
+		return "", "", "", errors.New("token expired")
+	}
+
 	email, emailOk := claims["Email"].(string)
 	userId, userIdOk := claims["ID"].(string)
 	role, roleOk := claims["Role"].(string)

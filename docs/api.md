@@ -1,20 +1,31 @@
-# RESTful API для user-service
+# RESTful API for user-service
 
-## Ресурси
+## Resources
 
-- **`/user`**
-- **`/profile`**
+- **`/users`**
+- **`/users/{id}`**
+- **`/admin/block/{id}`**
+- **`/admin/limit/{id}`**
+- **`/login`**
 
-## Методи
+## Supported Operations
+- `POST /users` - Adds a new user.
+- `GET /users` - Retrieves information about all users.- - `PATCH /users/{id}` - Updates information about a specific user.
+- `GET /users/{id}` - Retrieves information about a specific user by ID. Authentication is required.
+- `POST /admin/block/{id}` - Blocks a specific user by ID. Authentication is required.
+- `POST /admin/limit/{id}` - Limits a specific user by ID. Authentication is required.
+- `POST /login` - Authenticates a user and provides a session or token.
 
-### **`/user`**
+## Methods
 
-- **Створення (Create)**
-  - **Метод:** `POST`
-  - **Опис:** Додає нового користувача.
-  - **Приклад запиту:**
+### **`/users`**
+
+- **Create**
+  - **Method:** `POST`
+  - **Description:** Adds a new user.
+  - **Example Request:**
     ```http
-    POST /user
+    POST /users
     Content-Type: application/json
 
     {
@@ -23,21 +34,69 @@
     }
     ```
 
-- **Читання (Read)**
-  - **Метод:** `GET`
-  - **Опис:** Отримує інформацію про користувача.
-  - **Приклад запиту:**
+- **Read All**
+  - **Method:** `GET`
+  - **Description:** Retrieves information about all users.
+  - **Example Request:**
     ```http
-    GET /user
+    GET /users
     ```
 
-
-### **`/profile`**
-
-- **Читання (Read)**
-  - **Метод:** `GET`
-  - **Опис:** Отримує інформацію про профіль користувача.
-  - **Приклад запиту:**
+- **Update**
+  - **Method:** `PATCH`
+  - **Description:** Updates information about a specific user.
+  - **Example Request:**
     ```http
-    GET /profile
+    PATCH /users/{id}
+    Content-Type: application/json
+
+    {
+      "email": "newemail@example.com"
+    }
+    ```
+
+### **`/users/{id}`**
+
+- **Read by ID**
+  - **Method:** `GET`
+  - **Description:** Retrieves information about a specific user by ID. Authentication is required.
+  - **Example Request:**
+    ```http
+    GET /users/{id}
+    ```
+
+### **`/admin/block/{id}`**
+
+- **Block User**
+  - **Method:** `POST`
+  - **Description:** Blocks a specific user by ID. Authentication is required.
+  - **Example Request:**
+    ```http
+    POST /admin/block/{id}
+    ```
+
+### **`/admin/limit/{id}`**
+
+- **Limit User**
+  - **Method:** `POST`
+  - **Description:** Limits a specific user by ID. Authentication is required.
+  - **Example Request:**
+    ```http
+    POST /admin/limit/{id}
+    ```
+
+### **`/login`**
+
+- **Login**
+  - **Method:** `POST`
+  - **Description:** Authenticates a user and provides a session or token.
+  - **Example Request:**
+    ```http
+    POST /login
+    Content-Type: application/json
+
+    {
+      "email": "user@example.com",
+      "password": "securepassword"
+    }
     ```
