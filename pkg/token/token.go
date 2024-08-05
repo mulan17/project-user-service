@@ -61,5 +61,3 @@ func VerifyToken(tokenString string) (string, string, string, error) {
 
 	return email, role, userId, nil
 }
-
-

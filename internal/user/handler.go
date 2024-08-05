@@ -33,7 +33,6 @@ func NewHandler(s service) Handler {
 	}
 }
 
-// TODO розібратись по функції щоб потіп додати помилки, бо ми тут пропусти та необмазували помилками
 func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	var reqBody CreateUserRequestBody
 
@@ -45,7 +44,7 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = h.s.SignUp(reqBody.Email, reqBody.Password)
-	
+
 	if err != nil {
 		if errors.Is(err, service_errors.ErrUserAlreadyExists) {
 			w.WriteHeader(http.StatusConflict)
