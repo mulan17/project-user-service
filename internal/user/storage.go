@@ -3,13 +3,12 @@ package user
 import (
 	"database/sql"
 	"fmt"
-	
 
 	_ "github.com/lib/pq"
 	"strings"
 
-	"github.com/rs/zerolog/log"
 	"github.com/mulan17/project-user-service/pkg/authentication_check"
+	"github.com/rs/zerolog/log"
 )
 
 type PostgresStorage struct {
@@ -58,7 +57,7 @@ func (s *PostgresStorage) Login(email, password string) (User, error) {
 	err := s.DB.QueryRow("SELECT id, email, password, role, name, lastname, status FROM users WHERE email = $1", email).Scan(&user.ID, &user.Email, &user.Password, &user.Role, &user.Name, &user.Lastname, &user.Status)
 	if err != nil {
 		return User{}, fmt.Errorf("Can't find user %v", err)
-	} 
+	}
 	log.Printf("(66)User from DB: %v", user)
 	err = authentication_check.ValidateCredentials(password, user.Password)
 	if err != nil {
@@ -86,16 +85,6 @@ func (s *PostgresStorage) GetUserById(id string) (User, error) {
 	return user, nil
 }
 
-// func (s *PostgresStorage) UpdateUser(user User, id string) error {
-// 	_, err := s.DB.Exec("UPDATE users SET email=$1, password=$2, role=$3, name=$4, lastname=$5, status=$6 WHERE id=$7", user.Email, user.Password, user.Role, user.Name, user.Lastname, user.Status, id)
-// 	if err != nil {
-// 		// log.Fatal().Err(err).Msg("Failed to update user")
-// 		return fmt.Errorf("updating user: %v", err)
-// 	}
-// 	return nil
-// }
-
-// TODO спростить функцію та видалити коменти вище
 func (s *PostgresStorage) UpdateUser(user User, id string) error {
 	query := "UPDATE users SET"
 	var updates []string
