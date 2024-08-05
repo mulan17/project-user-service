@@ -6,13 +6,17 @@
 
 2. **Описуємо RESTful API на основі бізнес моделей та поведінки**
    - Які у нас є ресурси?
-     - `/my/orders`
-     - `/orders`
-     - `/users`
-     - `/me`
+     - `/user`
+     - `/user{id}`
+     - `/admin/block/{id}`
+     - `/admin/limit/{id}`
    - Які операції ці ресурси підтримують?
-     - `POST /my/orders`
-     - `GET /users`
+     - `POST /users` - Adds a new user.
+     - `GET /users` - Retrieves information about all users.- - `PATCH /users/{id}` - Updates information about a specific user.
+     - `GET /users/{id}` - Retrieves information about a specific user by ID. Authentication is required.
+     - `POST /admin/block/{id}` - Blocks a specific user by ID. Authentication is required.
+     - `POST /admin/limit/{id}` - Limits a specific user by ID. Authentication is required.
+     - `POST /login` - Authenticates a user and provides a session or token.
 
 3. **Описуємо архітектуру сервісу з точки зору Go**
    - Які у нас є шари та пакети?
