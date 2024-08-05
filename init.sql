@@ -9,5 +9,5 @@ CREATE TABLE users (
 );
 
 INSERT INTO users (email, password, role, name, lastname, status)
-VALUES ('admin@example.com', 'hashed_password_here', 'admin', 'NameAdmin', 'LastNameAdmin', 'active')
+VALUES ('admin@example.com', '$2a$10$WpbBrnpLVTuAMQn86SgJ1OzJxjrz9WYFh9my8sYvyGdfG6Zvxfo8K', 'admin', 'NameAdmin', 'LastNameAdmin', 'active')
 ON CONFLICT (email) DO NOTHING;

@@ -14,7 +14,7 @@ func GenerateToken(email, role, userId string) (string, error) {
 		"Email": email,
 		"ID":    userId,
 		"Role":  role,
-		"exp":   time.Now().Add(time.Hour * 2).Unix(), // Token expiration time
+		"exp":   time.Now().Add(time.Hour * 2).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
