@@ -8,6 +8,8 @@ import (
 	"github.com/mulan17/project-user-service/pkg/token"
 )
 
+type contextKey string
+
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authToken := r.Header.Get("Authorization")
@@ -17,9 +19,7 @@ func Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		if strings.HasPrefix(authToken, "Bearer ") {
-			authToken = strings.TrimPrefix(authToken, "Bearer ")
-		}
+		authToken = strings.TrimPrefix(authToken, "Bearer ")
 
 		email, role, userId, err := token.VerifyToken(authToken)
 
@@ -33,9 +33,9 @@ func Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "userId", userId)
-		ctx = context.WithValue(ctx, "role", role)
-		ctx = context.WithValue(ctx, "email", email)
+		ctx := context.WithValue(r.Context(), contextKey("userId"), userId)
+		ctx = context.WithValue(ctx, contextKey("role"), role)
+		ctx = context.WithValue(ctx, contextKey("email"), email)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
