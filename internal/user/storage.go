@@ -56,12 +56,12 @@ func (s *PostgresStorage) Login(email, password string) (User, error) {
 	var user User
 	err := s.DB.QueryRow("SELECT id, email, password, role, name, lastname, status FROM users WHERE email = $1", email).Scan(&user.ID, &user.Email, &user.Password, &user.Role, &user.Name, &user.Lastname, &user.Status)
 	if err != nil {
-		return User{}, fmt.Errorf("Can't find user %v", err)
+		return User{}, fmt.Errorf("can't find user %v", err)
 	}
 	log.Printf("(66)User from DB: %v", user)
 	err = authentication_check.ValidateCredentials(password, user.Password)
 	if err != nil {
-		return User{}, fmt.Errorf("Wrong password %v", err)
+		return User{}, fmt.Errorf("wrong password %v", err)
 	}
 	return user, nil
 }
